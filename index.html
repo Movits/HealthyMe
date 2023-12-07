@@ -3,27 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <title>HealthyMe</title>
 </head>
 <body>
+
     <div id="container">
+
         <h1>HealthyMe Dashboard</h1>
         <section id="water-tracker">
-            <!-- Water Intake Tracker -->
+            <h2>Water Intake Tracker</h2>
+            <button id="water-intake-button">Add Cup</button>
+            <button id="water-intake-reset-button">Reset Today's Intake</button>
+            <p id="water-intake-display"></p>
+            <canvas id="water-intake-chart"></canvas>
         </section>
+
         <section id="weight-tracker">
-            <!-- Weight Tracker -->
+            <h2>Weight Tracker</h2>
+            <input type="number" id="weight-input" placeholder="Adjust weight in kg">
+            <button id="weight-adjust-button">Adjust Weight</button>
+            <p id="weight-display"></p>
+            <canvas id="weight-chart"></canvas>
         </section>
+
         <section id="habits-checklist">
             <!-- Healthy Habits Checklist -->
         </section>
+
         <section id="progress-visualization">
             <!-- Progress Visualization -->
         </section>
+
         <section id="daily-tips">
             <!-- Daily Health Tips -->
         </section>
+
     </div>
+
     <script src="script.js"></script>
 </body>
 </html>
