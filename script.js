@@ -5,15 +5,25 @@ function saveToLocalStorage(key, data) {
 
 function loadFromLocalStorage(key) {
     const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : [];
+    return data ? JSON.parse(data) : null;
 }
 
 function getTodayDate() {
     return new Date().toISOString().split('T')[0];
 }
 
+// Global variables for chart instances
+let waterIntakeChartInstance;
+let weightChartInstance;
+
 // Water Intake Tracker
-let waterIntakeHistory = loadFromLocalStorage('waterIntakeHistory') || {};
+let waterIntakeHistoryRaw = loadFromLocalStorage('waterIntakeHistory');
+let waterIntakeHistory = {};
+
+if (waterIntakeHistoryRaw && typeof waterIntakeHistoryRaw === 'object' && !Array.isArray(waterIntakeHistoryRaw)) {
+    waterIntakeHistory = waterIntakeHistoryRaw;
+}
+
 const currentDate = getTodayDate();
 
 if (!waterIntakeHistory[currentDate]) {
@@ -43,11 +53,15 @@ function displayWaterIntake() {
 }
 
 function generateWaterIntakeChart() {
+    if (waterIntakeChartInstance) {
+        waterIntakeChartInstance.destroy();
+    }
+
     const ctx = document.getElementById('water-intake-chart').getContext('2d');
     const dates = Object.keys(waterIntakeHistory);
     const cups = Object.values(waterIntakeHistory);
 
-    new Chart(ctx, {
+    waterIntakeChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: dates,
@@ -70,19 +84,25 @@ function generateWaterIntakeChart() {
 }
 
 // Weight Tracker
-let weightData = loadFromLocalStorage('weightData') || {};
-const weightInput = document.getElementById('weight-input');
-const weightAdjustButton = document.getElementById('weight-adjust-button');
-const weightDisplay = document.getElementById('weight-display');
+let weightDataRaw = loadFromLocalStorage('weightData');
+let weightData = {};
 
-if (!weightData[currentDate]) {
-    weightData[currentDate] = parseFloat(weightData[Object.keys(weightData).pop()]) || 0; // Ensure number
+if (weightDataRaw && typeof weightDataRaw === 'object' && !Array.isArray(weightDataRaw)) {
+    weightData = weightDataRaw;
 }
 
-weightAdjustButton.addEventListener('click', () => {
-    const adjustment = parseFloat(weightInput.value);
-    if (!isNaN(adjustment)) {
-        weightData[currentDate] = (weightData[currentDate] || 0) + adjustment; // Ensure arithmetic addition
+if (!weightData[currentDate]) {
+    weightData[currentDate] = 0; // Default to 0 if no data is present
+}
+
+const weightInput = document.getElementById('weight-input');
+const weightSetButton = document.getElementById('weight-set-button');
+const weightDisplay = document.getElementById('weight-display');
+
+weightSetButton.addEventListener('click', () => {
+    const currentWeight = parseFloat(weightInput.value);
+    if (!isNaN(currentWeight)) {
+        weightData[currentDate] = currentWeight;
         saveToLocalStorage('weightData', weightData);
         displayWeight();
         generateWeightChart();
@@ -90,15 +110,19 @@ weightAdjustButton.addEventListener('click', () => {
 });
 
 function displayWeight() {
-    weightDisplay.textContent = `Current weight: ${weightData[currentDate].toFixed(2)} kg`; // Rounded to 2 decimal places
+    weightDisplay.textContent = `Current weight: ${weightData[currentDate]?.toFixed(2) || 'Not set'} kg`;
 }
 
 function generateWeightChart() {
+    if (weightChartInstance) {
+        weightChartInstance.destroy();
+    }
+
     const ctx = document.getElementById('weight-chart').getContext('2d');
     const dates = Object.keys(weightData);
     const weights = Object.values(weightData);
 
-    new Chart(ctx, {
+    weightChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: dates,
@@ -120,8 +144,13 @@ function generateWeightChart() {
     });
 }
 
-// Healthy Habits Checklist
-const habitsData = loadFromLocalStorage('habitsData') || [];
+/* // Healthy Habits Checklist
+let habitsData = loadFromLocalStorage('habitsData');
+
+if (!Array.isArray(habitsData)) {
+    habitsData = [];
+}
+
 const habitsChecklist = document.getElementById('habits-checklist');
 
 function saveHabitChanges() {
@@ -145,10 +174,13 @@ function displayHabits() {
         label.append(habit.habit);
         habitsChecklist.appendChild(label);
     });
-}
-displayHabits();
+} */
+
+console.log("Loaded weightData from localStorage:", weightData);
+console.log("Loaded waterIntakeHistory from localStorage:", waterIntakeHistory);
 
 // Initial display and chart generation
+/* displayHabits(); */
 displayWaterIntake();
 generateWaterIntakeChart();
 displayWeight();
